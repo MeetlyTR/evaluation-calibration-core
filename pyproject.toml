@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "evaluation-calibration-core"
+version = "0.1.0"
+description = "Evaluation & Calibration Core: Replay scenarios, compute metrics, produce reports, and calibrate policies"
+requires-python = ">=3.11"
+dependencies = [
+    "decision-schema>=0.1,<0.2",
+]
+
+[project.optional-dependencies]
+mdm = []  # Optional: MDM engine plugin
+dmc = []  # Optional: DMC plugin
+dev = ["pytest>=7", "ruff"]
+cli = ["rich>=13.0"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["eval_calibration_core*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
