@@ -1,98 +1,71 @@
-# Evaluation & Calibration Core Formulas
+# Formulas — evaluation-calibration-core
 
-## Metrics Formulas
-
-### Action Distribution
+## Action Distribution
 
 ```
-count(action) = number of packets with final_action.action == action
-rate(action) = count(action) / total_packets
+action_count(action) = count(packets where final_action.action == action)
+action_rate(action) = action_count(action) / total_packets
 ```
 
-### Guard Trigger Rate
+## Guard Trigger Rate
 
 ```
-triggers(code) = number of packets with mismatch.reason_codes containing code
-trigger_rate(code) = triggers(code) / total_packets
+trigger_rate(code) = triggers(code) / total_steps
 ```
 
-### Safety Invariant Pass Rate
+Where `triggers(code)` is the count of packets where `mismatch.reason_codes` contains `code`.
+
+## Safety Invariant Pass Rate
 
 ```
-passed_checks = sum(1 for packet in packets if invariant_passes(packet))
-pass_rate = passed_checks / total_packets
+inv_pass = passed_checks / total_checks
 ```
 
-### Latency Percentiles
+Where `passed_checks` is the count of invariant checks that passed.
+
+## Latency Percentiles
 
 ```
-latencies = [packet.latency_ms for packet in packets]
-p50 = percentile(latencies, 50)
-p95 = percentile(latencies, 95)
-p99 = percentile(latencies, 99)
+p50_latency = percentile(latency_samples, 50)
+p95_latency = percentile(latency_samples, 95)
+p99_latency = percentile(latency_samples, 99)
+```
+
+Where `latency_samples` are extracted from `PacketV2.latency_ms`.
+
+## Confidence Statistics
+
+```
+mean_confidence = mean(proposal.confidence for all packets)
+std_confidence = std(proposal.confidence for all packets)
+min_confidence = min(proposal.confidence for all packets)
+max_confidence = max(proposal.confidence for all packets)
 ```
 
 ## Invariant Formulas
 
 ### Contract Closure
-
 ```
-invariant_passes = True if:
-  - final_action.allowed == True implies constraints_met(context)
-  - final_action.allowed == False implies constraints_not_met(context)
+pass = (proposal.action in Action enum) AND (final_action.action in Action enum)
 ```
 
 ### Confidence Clamp
-
 ```
-invariant_passes = True if:
-  - proposal.confidence >= 0.0 AND proposal.confidence <= 1.0
+pass = (0 <= proposal.confidence <= 1)
 ```
 
 ### Fail-Closed
-
 ```
-invariant_passes = True if:
-  - mismatch.flags non-empty implies final_action.action is safe (HOLD/STOP)
+pass = (mismatch.flags => final_action.allowed == False)
 ```
 
 ### Packet Version
-
 ```
-invariant_passes = True if:
-  - packet.packet_version == "2"
-  - packet.schema_version matches expected schema version
+pass = (packet.schema_version is present)
 ```
 
-## Contract Matrix Check
+## Invariants
 
-### Schema Compatibility
-
-```
-ok = is_compatible(schema_version, expected_major=0, min_minor=1, max_minor=1)
-```
-
-Where:
-- `schema_version`: Current decision-schema version (e.g., "0.1.0")
-- `expected_major`: Expected major version (0 for 0.x)
-- `min_minor`: Minimum minor version (inclusive)
-- `max_minor`: Maximum minor version (inclusive)
-
-**Compatibility rules**:
-- For 0.x: compatible if major matches AND minor is within [min_minor, max_minor]
-- For 1.x+: compatible if major matches (minor/patch are backward compatible)
-
-## Calibration (Future)
-
-### Grid Search Objective
-
-```
-objective = w1 * invariant_pass_rate + w2 * (1 - deny_rate) - w3 * latency_p95
-```
-
-Where:
-- `invariant_pass_rate`: Rate at which invariants pass
-- `deny_rate`: Rate at which actions are denied
-- `latency_p95`: 95th percentile latency
-
-Grid search optimizes policy thresholds to maximize objective while maintaining safety.
+- **Fail-closed**: On errors, return empty metrics or safe defaults
+- **Deterministic**: Same inputs → same outputs
+- **Schema validation**: Reject incompatible PacketV2 versions

@@ -1,55 +1,44 @@
-# Evaluation & Calibration Core
+# evaluation-calibration-core (Evidence, Metrics, Reports)
 
-**Evaluation & Calibration Core** evaluates decision pipelines via the shared `decision-schema` contract. It replays scenarios, computes metrics, produces reports, and optionally calibrates policy thresholds.
+This core generates evidence artifacts from `PacketV2` traces:
+- metrics
+- invariant checks
+- calibration and drift summaries
 
-## Domain-Agnostic Guarantee
+Domain-agnostic; depends only on `decision-schema`.
 
-Evaluation & Calibration Core is designed to work across **any domain** that uses `decision-schema`:
+## Responsibilities
 
-- ✅ **No domain-specific logic**: Metrics and invariants are generic
-- ✅ **Contract-first**: Only depends on `decision-schema` types
-- ✅ **Generic metrics**: Action distribution, guard trigger rates, latency stats
-- ✅ **Domain-agnostic invariants**: Contract closure, confidence clamp, fail-closed
-- ✅ **Flexible fixtures**: Test suites work for any decision pipeline
-- ✅ **Optional calibration**: Grid-search over generic policy parameters
+- Read `PacketV2` traces from JSONL files
+- Compute metrics (action distribution, guard trigger rates, latency percentiles)
+- Verify invariants (contract closure, confidence clamp, fail-closed)
+- Generate reports (JSON + Markdown)
 
-## Purpose
+## Integration
 
-This core provides:
-- **Scenario replay**: Replay PacketV2 traces or synthetic fixtures
-- **Metrics computation**: Action distribution, guard trigger rates, safety invariants, latency percentiles
-- **Report generation**: JSON + Markdown reports
-- **Invariant checks**: Mathematical guarantee checks (contract closure, confidence clamp, fail-closed)
-- **Optional calibration**: Safe grid-search over policy thresholds
+```python
+from eval_calibration_core.io.packet_reader import PacketReader
+from eval_calibration_core.metrics.compute import compute_metrics
+from eval_calibration_core.report import build_report
 
-## Use Cases
+# Read packets
+reader = PacketReader("traces.jsonl")
+packets = list(reader.read())
 
-Evaluation & Calibration Core enables evaluation in various domains:
+# Compute metrics
+metrics = compute_metrics(packets)
 
-### 1. Content Moderation Pipeline Evaluation
-- **Input**: PacketV2 traces from moderation runs
-- **Metrics**: Action distribution (moderate/flag/approve), guard trigger rates (rate limits, cooldowns)
-- **Invariants**: Confidence clamp, fail-closed (guards deny unsafe actions)
+# Generate report
+report = build_report(packets)
+report.save_json("report.json")
+report.save_markdown("report.md")
+```
 
-### 2. Robotics Control System Evaluation
-- **Input**: PacketV2 traces from robot control runs
-- **Metrics**: Action distribution (move/stop/rotate), guard trigger rates (battery limits, collision avoidance)
-- **Invariants**: Safety guards trigger on low battery, high collision risk
+## Documentation
 
-### 3. API Rate Limiting Evaluation
-- **Input**: PacketV2 traces from API request processing
-- **Metrics**: Action distribution (allow/throttle/deny), guard trigger rates (rate limits, quota limits)
-- **Invariants**: Rate limits enforced, quota limits respected
-
-### 4. Resource Allocation Evaluation
-- **Input**: PacketV2 traces from resource allocation runs
-- **Metrics**: Action distribution (allocate/reject), guard trigger rates (capacity limits, cooldowns)
-- **Invariants**: Capacity limits enforced, cooldowns respected
-
-### 5. Trading/Financial Markets (Optional)
-- **Input**: PacketV2 traces from trading runs
-- **Metrics**: Action distribution, guard trigger rates (exposure limits, drawdown limits)
-- **Invariants**: Risk guards trigger on exposure/drawdown thresholds
+- `docs/ARCHITECTURE.md`: System architecture
+- `docs/FORMULAS.md`: Metric definitions and formulas
+- `docs/INTEGRATION_GUIDE.md`: Integration examples
 
 ## Installation
 
@@ -62,82 +51,11 @@ Or from git:
 pip install git+https://github.com/MeetlyTR/evaluation-calibration-core.git
 ```
 
-## Quick Start
-
-### Run Evaluation Suite
+## Tests
 
 ```bash
-# Use built-in fixture suite
-python -m eval_calibration_core.cli run --suite smoke --out reports/smoke
-
-# Use custom JSONL file
-python -m eval_calibration_core.cli run --in traces.jsonl --out reports/custom
+pytest tests/
 ```
-
-### Generate Report
-
-```bash
-python -m eval_calibration_core.cli report --out reports/latest
-```
-
-## Dependencies
-
-**Required**:
-- `decision-schema>=0.1,<0.2` (contract dependency)
-
-**Optional**:
-- `[mdm]`: MDM engine plugin support
-- `[dmc]`: DMC plugin support
-- `[cli]`: Rich CLI formatting (`rich>=13.0`)
-
-## Architecture
-
-- **Contract-first**: Only depends on `decision-schema`
-- **Plugin-based**: MDM/DMC are optional plugins
-- **Offline**: No network calls, all tests run offline
-- **Domain-agnostic**: No trading/exchange-specific terms
-
-## Metrics
-
-### Action Distribution
-Count and rates of actions in final decisions.
-
-### Guard Trigger Rate
-Rate at which guards trigger per reason code:
-```
-trigger_rate(code) = triggers(code) / total_steps
-```
-
-### Safety Invariant Pass Rate
-Rate at which safety invariants pass:
-```
-inv_pass = passed_checks / total_checks
-```
-
-### Latency Percentiles
-p50, p95, p99 latency from PacketV2.latency_ms.
-
-## Invariants
-
-Mathematical guarantee checks:
-
-1. **Contract Closure**: Proposal.action and FinalDecision.action must be in Action enum
-2. **Confidence Clamp**: Proposal.confidence must be within [0,1]
-3. **Fail-Closed**: If mismatch contains deny flags => allowed must be False
-4. **Packet Version**: PacketV2.schema_version must be present
-
-## Test Suites
-
-- **smoke**: Minimal smoke test (10 packets)
-- **determinism**: Determinism test (20 packets)
-- **guard_pressure**: Guard trigger test (20 packets with guard triggers)
-
-## Documentation
-
-- `docs/ARCHITECTURE.md`: System architecture
-- `docs/FORMULAS.md`: Metric definitions and formulas
-- `docs/INTEGRATION_GUIDE.md`: Integration examples
-- `docs/PUBLIC_RELEASE_GUIDE.md`: Public release checklist
 
 ## License
 

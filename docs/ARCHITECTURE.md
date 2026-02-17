@@ -1,100 +1,65 @@
-# Evaluation & Calibration Core Architecture
+# Architecture — evaluation-calibration-core
 
-## Purpose
+## Role in the ecosystem
 
-**Evaluation & Calibration Core** evaluates decision pipelines via PacketV2 traces. It provides metrics computation, invariant checks, report generation, and optional policy calibration.
+evaluation-calibration-core generates **evidence artifacts** from `PacketV2` traces.
 
-## Data Flow
+## Data flow
 
 ```
-PacketV2 JSONL → PacketReader → Metrics Computation → Invariant Checks → Report (JSON + MD)
+PacketV2 traces -> read_packets() -> compute_metrics() -> build_report() -> Report
 ```
+
+## Metrics computation
+
+Metrics are computed from `PacketV2` traces:
+- Action distribution
+- Guard trigger rates
+- Latency percentiles
+- Invariant pass rates
+
+## Invariant checks
+
+Mathematical guarantee checks:
+- Contract closure: Proposal.action and FinalDecision.action must be in Action enum
+- Confidence clamp: Proposal.confidence must be within [0,1]
+- Fail-closed: If mismatch contains deny flags => allowed must be False
+- Packet version: PacketV2.schema_version must be present
+
+## Contracts
+
+- Input: `PacketV2` traces (from JSONL files)
+- Output: Metrics dict, Report (JSON + Markdown)
+- Uses `decision_schema.packet_v2.PacketV2` for trace reading
 
 ## Components
 
 ### 1. Packet Reader (`eval_calibration_core/io/packet_reader.py`)
 
-**Function**: `PacketReader.read_all() -> list[PacketV2]`
+**Class**: `PacketReader`
 
-- Reads PacketV2 objects from JSONL files
-- Validates packet structure
-- Handles missing/invalid packets gracefully
+- Reads `PacketV2` from JSONL files
+- Validates schema compatibility
 
-### 2. Fixture Suites (`eval_calibration_core/io/fixtures.py`)
+### 2. Metrics Computation (`eval_calibration_core/metrics/compute.py`)
 
-**Function**: `load_fixture_suite(name: str) -> list[PacketV2]`
+**Function**: `compute_metrics(packets: Iterable[PacketV2]) -> dict`
 
-Provides synthetic test suites:
-- `smoke`: Minimal valid packets
-- `determinism`: Deterministic scenarios
-- `guard_pressure`: Scenarios that trigger guards
+- Computes action distribution
+- Computes guard trigger rates
+- Computes latency percentiles
+- Verifies invariants
 
-### 3. Metrics Computation (`eval_calibration_core/metrics/`)
+### 3. Report Generation (`eval_calibration_core/report.py`)
 
-**Function**: `compute_metrics(packets: list[PacketV2]) -> dict`
+**Function**: `build_report(packets: Iterable[PacketV2]) -> Report`
 
-Computes:
-- **Action distribution**: Count and rates of actions
-- **Guard trigger rate**: Rate at which guards trigger per reason code
-- **Safety invariant pass rate**: Rate at which safety invariants pass
-- **Latency percentiles**: p50, p95, p99 latency statistics
+- Generates JSON report
+- Generates Markdown report
+- Includes metrics and invariant checks
 
-### 4. Invariant Checks (`eval_calibration_core/suites/invariants.py`)
+## Safety invariants
 
-**Function**: `check_invariants(packets: list[PacketV2]) -> dict[str, bool]`
-
-Checks:
-- **Contract closure**: `allowed=True` implies constraints met
-- **Confidence clamp**: `confidence ∈ [0.0, 1.0]`
-- **Fail-closed**: Guard failures result in safe actions
-- **Packet version**: Packet structure matches expected version
-
-### 5. Report Generation (`eval_calibration_core/report/`)
-
-**Function**: `write_report(report: Report, output_dir: Path)`
-
-- Generates JSON report (`report.json`)
-- Generates Markdown report (`report.md`)
-- Includes contract matrix compatibility check
-
-### 6. Contract Compatibility (`eval_calibration_core/contracts.py`)
-
-**Functions**:
-- `check_schema_compatibility()`: Verify schema version compatibility
-- `check_expected_minor_range()`: Check minor version range
-- `get_schema_version()`: Get current schema version
-
-## Integration Points
-
-### Input: PacketV2 Traces
-
-Evaluation core consumes PacketV2 traces (from `decision-schema`):
-- Can read from JSONL files
-- Can use synthetic fixture suites
-- No domain-specific assumptions
-
-### Output: Reports
-
-Reports include:
-- Metrics (action distribution, guard triggers, latency)
-- Invariant results (pass/fail)
-- Contract matrix check (schema compatibility)
-
-### Optional Plugins
-
-- **MDM plugin**: Replay MDM proposals (optional)
-- **DMC plugin**: Replay DMC modulation (optional)
-
-## Design Principles
-
-1. **Contract-first**: Only depends on `decision-schema`
-2. **Offline**: No network calls, all tests run offline
-3. **Domain-agnostic**: No trading/exchange-specific terms
-4. **Deterministic**: Same packets → same metrics
-5. **Extensible**: Plugin system for MDM/DMC replay
-
-## Non-Goals
-
-- **Not a runtime system**: Does not execute decisions
-- **Not domain-specific**: No trading/exchange logic
-- **Not a test framework**: Focuses on metrics/invariants, not unit tests
+- **Fail-closed**: On errors, return empty metrics or safe defaults
+- **Deterministic**: Same inputs → same outputs
+- **Schema validation**: Reject incompatible PacketV2 versions
