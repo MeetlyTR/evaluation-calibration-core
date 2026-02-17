@@ -9,7 +9,7 @@ def check_schema_compatibility(expected_minor: int = 2) -> None:
     Check if decision-schema version is compatible.
     
     Args:
-        expected_minor: Expected minor version (default: 1 for 0.1.x)
+        expected_minor: Expected minor version (default: 2 for 0.2.x)
     
     Raises:
         RuntimeError: If schema version is incompatible
@@ -32,8 +32,8 @@ def check_expected_minor_range(expected_major: int = 0, min_minor: int = 2, max_
     
     Args:
         expected_major: Expected major version (default: 0)
-        min_minor: Minimum minor version (default: 1)
-        max_minor: Maximum minor version (default: 1)
+        min_minor: Minimum minor version (default: 2)
+        max_minor: Maximum minor version (default: 2)
     
     Returns:
         Tuple of (ok: bool, details: dict)
