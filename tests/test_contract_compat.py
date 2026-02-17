@@ -14,8 +14,8 @@ def test_schema_version_import() -> None:
 
 def test_schema_compatibility() -> None:
     """Verify schema compatibility check."""
-    # Should not raise for compatible version
-    check_schema_compatibility(expected_minor=1)
+    # Should not raise for compatible version (0.2.x)
+    check_schema_compatibility(expected_minor=2)
 
 
 def test_schema_compatibility_fails_on_incompatible() -> None:
@@ -23,7 +23,7 @@ def test_schema_compatibility_fails_on_incompatible() -> None:
     # This test verifies the check works; actual failure would require version mismatch
     # In real scenario, this would fail if schema version is incompatible
     try:
-        check_schema_compatibility(expected_minor=1)
+        check_schema_compatibility(expected_minor=99)
         # If we get here, version is compatible (expected)
         assert True
     except RuntimeError:

@@ -22,11 +22,11 @@ def test_report_includes_contract_matrix_check(tmp_path: Path) -> None:
     invariant_results = check_invariants(packets)
     
     # Check contract compatibility
-    contract_ok, contract_details = check_expected_minor_range(expected_major=0, min_minor=1, max_minor=1)
+    contract_ok, contract_details = check_expected_minor_range(expected_major=0, min_minor=2, max_minor=2)
     
     # Create report
     report = Report(
-        schema_version="0.1.0",
+        schema_version="0.2.0",
         suite_name="smoke",
         input_stats={"total_packets": len(packets)},
         metrics=metrics,
@@ -48,7 +48,7 @@ def test_report_includes_contract_matrix_check(tmp_path: Path) -> None:
     check = report_dict["contract_matrix_check"]
     assert "schema_version" in check
     assert "compatible" in check
-    assert check["compatible"] == True  # Should be compatible with 0.1.x
+    assert check["compatible"] is True  # Should be compatible with 0.2.x
     
     # Verify Markdown includes contract check
     md_path = tmp_path / "report.md"

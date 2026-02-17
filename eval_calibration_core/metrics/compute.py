@@ -20,7 +20,7 @@ def compute_metrics(packets: list[PacketV2]) -> dict[str, Any]:
     if not packets:
         return {
             "action_distribution": {},
-            "guard_trigger_rate": {},
+            "guard_trigger_rates": {},
             "safety_invariant_pass_rate": 1.0,
             "latency_percentiles": {"p50": 0.0, "p95": 0.0, "p99": 0.0},
             "total_steps": 0,
@@ -28,7 +28,7 @@ def compute_metrics(packets: list[PacketV2]) -> dict[str, Any]:
 
     return {
         "action_distribution": MetricDefinitions.action_distribution(packets),
-        "guard_trigger_rate": MetricDefinitions.guard_trigger_rate(packets),
+        "guard_trigger_rates": MetricDefinitions.guard_trigger_rate(packets),
         "safety_invariant_pass_rate": MetricDefinitions.safety_invariant_pass_rate(packets),
         "latency_percentiles": MetricDefinitions.latency_percentiles(packets),
         "total_steps": len(packets),

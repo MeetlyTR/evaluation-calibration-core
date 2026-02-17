@@ -10,7 +10,7 @@ def test_compute_metrics_smoke() -> None:
     metrics = compute_metrics(packets)
 
     assert "action_distribution" in metrics
-    assert "guard_trigger_rate" in metrics
+    assert "guard_trigger_rates" in metrics
     assert "safety_invariant_pass_rate" in metrics
     assert "latency_percentiles" in metrics
     assert "total_steps" in metrics
@@ -30,5 +30,5 @@ def test_compute_metrics_guard_pressure() -> None:
     metrics = compute_metrics(packets)
 
     # Should have guard triggers
-    assert len(metrics["guard_trigger_rate"]) > 0
-    assert "max_exposure_exceeded" in metrics["guard_trigger_rate"]
+    assert len(metrics["guard_trigger_rates"]) > 0
+    assert "max_exposure_exceeded" in metrics["guard_trigger_rates"]

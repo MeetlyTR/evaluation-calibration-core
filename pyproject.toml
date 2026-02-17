@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Evaluation & Calibration Core: Replay scenarios, compute metrics, produce reports, and calibrate policies"
 requires-python = ">=3.11"
 dependencies = [
-    "decision-schema>=0.1,<0.2",
+    "decision-schema>=0.2,<0.3",
 ]
 
 [project.optional-dependencies]

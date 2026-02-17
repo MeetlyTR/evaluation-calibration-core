@@ -55,10 +55,10 @@ def _format_markdown(report: Report) -> str:
         lines.append("")
 
     # Guard trigger rate
-    if "guard_trigger_rate" in report.metrics:
-        lines.append("### Guard Trigger Rate")
+    if "guard_trigger_rates" in report.metrics:
+        lines.append("### Guard Trigger Rates")
         lines.append("")
-        for code, rate in report.metrics["guard_trigger_rate"].items():
+        for code, rate in report.metrics["guard_trigger_rates"].items():
             lines.append(f"- {code}: {rate:.3f}")
         lines.append("")
 
