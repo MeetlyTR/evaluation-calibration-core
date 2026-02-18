@@ -1,3 +1,6 @@
+# Decision Ecosystem — evaluation-calibration-core
+# Copyright (c) 2026 Mücahit Muzaffer Karafil (MchtMzffr)
+# SPDX-License-Identifier: MIT
 """INV-V1: Version single-source — pyproject.toml [project] version must match package __version__."""
 
 import tomllib

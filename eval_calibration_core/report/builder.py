@@ -1,3 +1,6 @@
+# Decision Ecosystem — evaluation-calibration-core
+# Copyright (c) 2026 Mücahit Muzaffer Karafil (MchtMzffr)
+# SPDX-License-Identifier: MIT
 """Build Report from PacketV2 list (metrics + invariants + contract check)."""
 
 from decision_schema import __version__ as schema_version

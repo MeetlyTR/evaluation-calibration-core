@@ -1,4 +1,11 @@
+<!--
+Decision Ecosystem — evaluation-calibration-core
+Copyright (c) 2026 Mücahit Muzaffer Karafil (MchtMzffr)
+SPDX-License-Identifier: MIT
+-->
 # Formulas — evaluation-calibration-core
+
+**Implemented metrics (this core):** action distribution, guard trigger rate, safety invariant pass rate, latency percentiles, confidence statistics. General outcome notation (R_T, R̄, σ, DD, MDD, SR) is defined in `decision-ecosystem-docs/FORMULAS.md` as optional/generic; this core does not compute outcome sums or means.
 
 ## Action Distribution
 

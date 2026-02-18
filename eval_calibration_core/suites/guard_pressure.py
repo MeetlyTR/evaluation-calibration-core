@@ -1,3 +1,6 @@
+# Decision Ecosystem — evaluation-calibration-core
+# Copyright (c) 2026 Mücahit Muzaffer Karafil (MchtMzffr)
+# SPDX-License-Identifier: MIT
 """Guard pressure test suite."""
 
 from decision_schema.packet_v2 import PacketV2

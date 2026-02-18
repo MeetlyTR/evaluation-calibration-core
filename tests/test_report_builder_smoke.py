@@ -1,3 +1,6 @@
+# Decision Ecosystem — evaluation-calibration-core
+# Copyright (c) 2026 Mücahit Muzaffer Karafil (MchtMzffr)
+# SPDX-License-Identifier: MIT
 """Smoke test: build_report produces report with INVARIANT 5 metric key set."""
 
 from eval_calibration_core.io.fixtures import load_fixture_suite

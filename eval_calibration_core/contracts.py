@@ -1,3 +1,6 @@
+# Decision Ecosystem — evaluation-calibration-core
+# Copyright (c) 2026 Mücahit Muzaffer Karafil (MchtMzffr)
+# SPDX-License-Identifier: MIT
 """Contract compatibility checks."""
 
 from decision_schema import __version__ as schema_version

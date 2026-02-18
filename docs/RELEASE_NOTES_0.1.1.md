@@ -1,3 +1,8 @@
+<!--
+Decision Ecosystem — evaluation-calibration-core
+Copyright (c) 2026 Mücahit Muzaffer Karafil (MchtMzffr)
+SPDX-License-Identifier: MIT
+-->
 # Release Notes — evaluation-calibration-core 0.1.1
 
 **Release Date:** 2026-02-17  
