@@ -119,6 +119,51 @@ def test_invariant_fail_closed() -> None:
     assert results["fail_closed"] is False
 
 
+def test_invariant_fail_closed_exception_path() -> None:
+    """F8: Verify exception path invariant (allowed=False, mismatch=None => fail_closed marker)."""
+    # Valid: Exception path with harness.fail_closed marker
+    valid_exception = PacketV2(
+        run_id="test",
+        step=0,
+        input={},
+        external={"harness.fail_closed": True, "now_ms": 1700000000000},
+        mdm={"action": "HOLD"},
+        final_action={"action": "HOLD", "allowed": False},
+        latency_ms=1,
+        mismatch=None,  # Exception path: no mismatch
+    )
+    results = check_invariants([valid_exception])
+    assert results["fail_closed"] is True
+
+    # Valid: Exception path with other fail_closed marker (ops.fail_closed, etc.)
+    valid_ops_exception = PacketV2(
+        run_id="test",
+        step=0,
+        input={},
+        external={"ops.fail_closed": True},
+        mdm={"action": "HOLD"},
+        final_action={"action": "HOLD", "allowed": False},
+        latency_ms=1,
+        mismatch=None,
+    )
+    results = check_invariants([valid_ops_exception])
+    assert results["fail_closed"] is True
+
+    # Invalid: Exception path without fail_closed marker
+    invalid_exception = PacketV2(
+        run_id="test",
+        step=0,
+        input={},
+        external={},  # Missing fail_closed marker
+        mdm={"action": "HOLD"},
+        final_action={"action": "HOLD", "allowed": False},
+        latency_ms=1,
+        mismatch=None,  # No mismatch but no marker
+    )
+    results = check_invariants([invalid_exception])
+    assert results["fail_closed"] is False
+
+
 def test_invariant_5_metric_key_set() -> None:
     """INVARIANT 5: metric output key set is fixed and matches docs."""
     empty_metrics = compute_metrics([])

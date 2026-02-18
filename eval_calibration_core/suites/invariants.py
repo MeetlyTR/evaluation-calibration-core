@@ -44,17 +44,35 @@ def _check_confidence_clamp(packets: list[PacketV2]) -> bool:
 
 
 def _check_fail_closed(packets: list[PacketV2]) -> bool:
-    """Check: If mismatch contains deny flags => allowed must be False."""
+    """
+    Check fail-closed invariants:
+    1. If mismatch contains deny flags => allowed must be False
+    2. If allowed=False and mismatch is None => external must have fail_closed marker
+    """
     for packet in packets:
         final_action = packet.final_action
         mismatch = packet.mismatch
+        external = packet.external
 
         allowed = final_action.get("allowed", True)
         has_deny_flags = mismatch is not None and mismatch.get("flags", [])
 
-        # Fail-closed: if deny flags exist, action must not be allowed
+        # Invariant 1: Fail-closed: if deny flags exist, action must not be allowed
         if has_deny_flags and allowed:
             return False
+
+        # Invariant 2 (F8): If allowed=False and mismatch is None, must have fail_closed marker
+        # This covers harness exception path (run_one_step catches exception)
+        if not allowed and mismatch is None:
+            # Check for any fail_closed marker (harness.fail_closed, ops.fail_closed, etc.)
+            if external is None:
+                return False  # Missing external dict entirely
+            has_fail_closed = any(
+                isinstance(key, str) and (key.endswith(".fail_closed") or key == "fail_closed")
+                for key in external.keys()
+            )
+            if not has_fail_closed:
+                return False
     return True
 
 
