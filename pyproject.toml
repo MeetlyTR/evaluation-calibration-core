@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "evaluation-calibration-core"
-version = "0.1.0"
+version = "0.1.1"
 description = "Evaluation & Calibration Core: Replay scenarios, compute metrics, produce reports, and calibrate policies"
 requires-python = ">=3.11"
 dependencies = [
