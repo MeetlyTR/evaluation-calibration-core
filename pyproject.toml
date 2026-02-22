@@ -17,6 +17,9 @@ dmc = []  # Optional: DMC plugin
 dev = ["pytest>=7", "ruff"]
 cli = ["rich>=13.0"]
 
+[project.scripts]
+eval-cal = "eval_calibration_core.cli:main"
+
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["eval_calibration_core*"]

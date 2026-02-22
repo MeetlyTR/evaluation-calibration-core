@@ -51,7 +51,7 @@ def main() -> None:
     try:
         check_schema_compatibility()
     except RuntimeError as e:
-        print(f"❌ Schema compatibility check failed: {e}")
+        print(f"[FAIL] Schema compatibility check failed: {e}")
         return
 
     if args.command == "run":
@@ -98,7 +98,7 @@ def _run_evaluation(args: argparse.Namespace) -> None:
 
     # Write report
     write_report(report, args.out)
-    print(f"✅ Report written to {args.out}/report.json and {args.out}/report.md")
+    print(f"[OK] Report written to {args.out}/report.json and {args.out}/report.md")
 
 
 if __name__ == "__main__":
